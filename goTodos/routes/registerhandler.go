@@ -41,6 +41,7 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			utils.InternalServerError(w, r)
 		}
+
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
