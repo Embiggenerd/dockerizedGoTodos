@@ -9,7 +9,9 @@ A simple authenticated todos app written using only sql, the go standard lib, an
 
 ## Visit App
 
-Clone the repo, type docker-compose up. Uses port 80.
+Clone the repo, type docker-compose up. Uses port 8088.
+
+Some folders will be created under root user.
 
 ## Demonstrates
 * Ability to read documentation and source code.
