@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
@@ -25,11 +26,9 @@ var cacheBustedCss string
 
 // Init initializes routes in main
 func Init() {
-	// var err string
 	cacheBustedCss, _ = utils.BustaCache("mainFloats.css", cacheBustedCss)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+
+	fmt.Println(cacheBustedCss)
 	fs := http.FileServer(http.Dir("public/"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.HandleFunc("/", authRequired(indexHandler))

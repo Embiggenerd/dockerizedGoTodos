@@ -131,8 +131,13 @@ func removeStaleFiles(prefix string) error {
 	return nil
 }
 
+// BustaCache creates a css file with its hash included in the name
 func BustaCache(filename, oldFile string) (string, error) {
 	var filenamePlusHash string
+	// Create 'public' filename if it doesn't exist
+	if _, err := os.Stat("public"); os.IsNotExist(err) {
+		os.Mkdir("public", 0700)
+	}
 
 	err := removeStaleFiles(filename)
 	if err != nil {

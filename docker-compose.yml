@@ -3,6 +3,7 @@ version: "3"
 services:
   db:
     build: ./db
+    user: $UID:$GID
     ports:
       - "5432:5432"
     environment:
@@ -13,8 +14,9 @@ services:
 
   gotodos:
     build: ./goTodos
+    user: $UID:$GID
     ports:
-      - "80:8000"
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/?sslmode=disable
     volumes:
