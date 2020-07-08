@@ -136,7 +136,7 @@ func BustaCache(filename, oldFile string) (string, error) {
 	var filenamePlusHash string
 	// Create 'public' filename if it doesn't exist
 	if _, err := os.Stat("public"); os.IsNotExist(err) {
-		os.Mkdir("public", 0700)
+		os.Mkdir("public", 0755)
 	}
 
 	err := removeStaleFiles(filename)
