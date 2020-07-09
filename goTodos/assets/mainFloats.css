@@ -3,15 +3,19 @@
 }
 
 html {
-  height: 100vh;
+  max-height: 100vh;
 }
 
 
 body {
   background-color: #333;
   height: 100vh;
+  margin: 0;
+  padding: 10px;
   font-size: 1.2em;
 }
+
+
 
 button {
   padding: 5px;
@@ -31,7 +35,7 @@ section {
 .header {
   text-align: center;
   background-color: #f1f1f1;
-  padding: 14px;
+  padding: 10px;
 }
 
 .nav {
@@ -127,6 +131,15 @@ section {
   text-align: center;
   background: #ddd;
   margin-top: 20px;
+}
+
+.error {
+  color: red;
+  min-height: 100px;
+}
+
+.error p {
+  margin: 0
 }
 
 @media screen and (max-width: 800px) {

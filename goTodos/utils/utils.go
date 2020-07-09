@@ -85,6 +85,7 @@ func BustaCache(filename string) (string, error) {
 
 	err := removeStaleFiles(filename)
 	if err != nil {
+		fmt.Println("Busta Cache Error", err)
 		return filenamePlusHash, err
 	}
 

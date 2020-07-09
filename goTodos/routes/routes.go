@@ -18,6 +18,7 @@ type templData struct {
 	TodoId string
 	Todos  []*models.Todo
 	User   *models.User
+	Error  *utils.HTTPError
 }
 
 type contextKey string

@@ -18,9 +18,8 @@ func (e HTTPError) Error() string {
 
 // InternalServerError handles errors with code 500
 func InternalServerError(w http.ResponseWriter, r *http.Request) {
-	// w.WriteHeader(http.StatusInternalServerError)
+
 	fmt.Println("InternServerError invoked")
-	http.Redirect(w, r, "/oops", http.StatusInternalServerError)
 }
 
 // UnauthorizedUserError handles errors with code 401

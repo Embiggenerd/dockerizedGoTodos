@@ -16,15 +16,16 @@ type User struct {
 }
 
 // RegisterUser returns
-func RegisterUser(u *User) (*User, error) {
+func RegisterUser(u *User) (*User, *utils.HTTPError) {
 	var id int
 	sqlUser := `
 		INSERT INTO users ( age, first_name, last_name, email, password)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id; `
 	err := db.QueryRow(sqlUser, u.Age, u.FirstName, u.LastName, u.Email, u.Password).Scan(&id)
+
 	if err != nil {
-		err = utils.HTTPError{Code: 400, Name: "Invalid Email", Msg: "User already registered"}
+		return nil, &utils.HTTPError{Code: 400, Name: "Invalid Email", Msg: "User already registered"}
 	}
 
 	user := new(User)
@@ -38,10 +39,10 @@ func RegisterUser(u *User) (*User, error) {
 		&user.LastName, &user.Email, &user.Password)
 
 	if err != nil {
-		err = utils.HTTPError{Code: 400, Name: "Invalid Email", Msg: "User already registers"}
+		return nil, &utils.HTTPError{Code: 500, Name: "Server Error", Msg: "An error happend that wasn't your fault"}
 	}
 
-	return user, err
+	return user, nil
 }
 
 func validatePassword(storedPassword, providedPassword string) (bool, error) {

@@ -3,29 +3,27 @@ package routes
 import (
 	"fmt"
 	"goTodos/models"
+	"goTodos/utils"
 	"net/http"
 	"strconv"
 )
 
 func registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		err := tmplts.ExecuteTemplate(w, "index.html", templData{
-			State: "signup", Header: "Register with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil,
-		})
 
-		if err != nil {
-			// utils.InternalServerError(w, r)
-		}
+	if r.Method == "GET" {
+
+		tmplts.ExecuteTemplate(w, "index.html", templData{
+			State: "signup", Header: "Register with an email and password, all values are required", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil, Error: nil,
+		})
 
 	} else {
 
 		r.ParseForm()
 		age, err := strconv.Atoi(r.Form["age"][0])
 
-		// if err != nil {
-		// 	utils.InternalServerError(w, r)
-		// 	return
-		// }
+		if err != nil {
+			fmt.Println(err)
+		}
 
 		user := models.User{
 			ID:        0,
@@ -35,13 +33,19 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 			Email:     r.Form["email"][0],
 			Password:  r.Form["password"][0]}
 
-		_, err = models.RegisterUser(&user)
+		_, httpErr := models.RegisterUser(&user)
 
-		if err != nil {
-			fmt.Println("registerError", err)
-			// http.Redirect(w, r, "/oops", http.StatusInternalServerError)
-			http.Redirect(w, r, "/oops", http.StatusFound)
-
+		if httpErr != nil {
+			w.WriteHeader(httpErr.Code)
+			tmplts.ExecuteTemplate(w, "index.html", templData{
+				State:  "signup",
+				Header: "Register with an email and password, all values are required",
+				Styles: cacheBustedCss,
+				TodoId: "",
+				Todos:  nil,
+				User:   nil,
+				Error:  &utils.HTTPError{Code: httpErr.Code, Name: httpErr.Name, Msg: httpErr.Msg},
+			})
 			return
 		}
 

@@ -8,11 +8,7 @@ import (
 func errorHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("status500Handler Invoked")
-	// err := tmplts.ExecuteTemplate(w, "500.html", nil)
 
-	// if err != nil {
-	// 	fmt.Println("500 template err", err)
-	// }
 	err := tmplts.ExecuteTemplate(w, "index.html", templData{State: "error", Header: "There was an error", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil})
 	if err != nil {
 		fmt.Println(err)
