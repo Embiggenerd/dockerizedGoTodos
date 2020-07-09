@@ -1,11 +1,9 @@
 package routes
 
 import (
-	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
-	"regexp"
 	"strconv"
 )
 
@@ -17,90 +15,92 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 			State: "signup", Header: "Register with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil, Error: nil,
 		})
 
-	} else {
-		var age int
-		var err error
-		r.ParseForm()
+	} else if r.Method == "POST" {
+		// var age int
+		// var err error
+		// r.ParseForm()
 
-		fmt.Println("len(age)", len(r.Form["age"]))
+		// fmt.Println("len(age)", len(r.Form["age"]))
 
-		if r.Form["email"][0] == "" {
-			w.WriteHeader(400)
-			tmplts.ExecuteTemplate(w, "index.html", templData{
-				State:  "signup",
-				Header: "Register with an email and password",
-				Styles: cacheBustedCss,
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error: &utils.HTTPError{
-					Code: 400,
-					Name: "Invalid Input",
-					Msg:  "Please include an email",
-				},
-			})
-			return
-		} else {
-			regex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-			if !regex.MatchString(r.Form["email"][0]) {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "signup",
-					Header: "Register with an email and password",
-					Styles: cacheBustedCss,
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Email must be in the form 'name@example.com",
-					},
-				})
-				return
-			}
-		}
+		// if r.Form["email"][0] == "" {
+		// 	w.WriteHeader(400)
+		// 	tmplts.ExecuteTemplate(w, "index.html", templData{
+		// 		State:  "signup",
+		// 		Header: "Register with an email and password",
+		// 		Styles: cacheBustedCss,
+		// 		TodoId: "",
+		// 		Todos:  nil,
+		// 		User:   nil,
+		// 		Error: &utils.HTTPError{
+		// 			Code: 400,
+		// 			Name: "Invalid Input",
+		// 			Msg:  "Please include an email",
+		// 		},
+		// 	})
+		// 	return
+		// } else {
+		// 	regex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		// 	if !regex.MatchString(r.Form["email"][0]) {
+		// 		w.WriteHeader(400)
+		// 		tmplts.ExecuteTemplate(w, "index.html", templData{
+		// 			State:  "signup",
+		// 			Header: "Register with an email and password",
+		// 			Styles: cacheBustedCss,
+		// 			TodoId: "",
+		// 			Todos:  nil,
+		// 			User:   nil,
+		// 			Error: &utils.HTTPError{
+		// 				Code: 400,
+		// 				Name: "Invalid Input",
+		// 				Msg:  "Email must be in the form 'name@example.com",
+		// 			},
+		// 		})
+		// 		return
+		// 	}
+		// }
 
-		if r.Form["password"][0] == "" {
-			w.WriteHeader(400)
-			tmplts.ExecuteTemplate(w, "index.html", templData{
-				State:  "signup",
-				Header: "Register with an email and password",
-				Styles: cacheBustedCss,
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error: &utils.HTTPError{
-					Code: 400,
-					Name: "Invalid Input",
-					Msg:  "Please include an password",
-				},
-			})
-			return
-		}
+		// if r.Form["password"][0] == "" {
+		// 	w.WriteHeader(400)
+		// 	tmplts.ExecuteTemplate(w, "index.html", templData{
+		// 		State:  "signup",
+		// 		Header: "Register with an email and password",
+		// 		Styles: cacheBustedCss,
+		// 		TodoId: "",
+		// 		Todos:  nil,
+		// 		User:   nil,
+		// 		Error: &utils.HTTPError{
+		// 			Code: 400,
+		// 			Name: "Invalid Input",
+		// 			Msg:  "Please include an password",
+		// 		},
+		// 	})
+		// 	return
+		// }
 
-		if r.Form["age"][0] != "" {
-			age, err = strconv.Atoi(r.Form["age"][0])
+		// if r.Form["age"][0] != "" {
+		// 	age, err = strconv.Atoi(r.Form["age"][0])
 
-			if err != nil {
-				fmt.Println(err)
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "signup",
-					Header: "Register with an email and password",
-					Styles: cacheBustedCss,
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Age must be an integer",
-					},
-				})
-				return
-			}
-		}
+		// 	if err != nil {
+		// 		fmt.Println(err)
+		// 		w.WriteHeader(400)
+		// 		tmplts.ExecuteTemplate(w, "index.html", templData{
+		// 			State:  "signup",
+		// 			Header: "Register with an email and password",
+		// 			Styles: cacheBustedCss,
+		// 			TodoId: "",
+		// 			Todos:  nil,
+		// 			User:   nil,
+		// 			Error: &utils.HTTPError{
+		// 				Code: 400,
+		// 				Name: "Invalid Input",
+		// 				Msg:  "Age must be an integer",
+		// 			},
+		// 		})
+		// 		return
+		// 	}
+		// }
+
+		age, _ := strconv.Atoi(r.Form["age"][0])
 
 		user := models.User{
 			ID:        0,

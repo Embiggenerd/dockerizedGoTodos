@@ -22,14 +22,27 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 			utils.InternalServerError(w, r)
 		}
 
-	} else {
+	} else if r.Method == "POST" {
 		r.ParseForm()
 
 		user, err := models.LoginUser(r.Form["password"][0], r.Form["email"][0])
 
 		if err != nil {
-			http.Redirect(w, r, "/register", http.StatusFound)
-
+			// http.Redirect(w, r, "/register", http.StatusFound)
+			w.WriteHeader(400)
+			tmplts.ExecuteTemplate(w, "index.html", templData{
+				State:  "login",
+				Header: "Log in with an email and password",
+				Styles: cacheBustedCss,
+				TodoId: "",
+				Todos:  nil,
+				User:   nil,
+				Error: &utils.HTTPError{
+					Code: 400,
+					Name: "Invalid Input",
+					Msg:  "Try again",
+				},
+			})
 		} else {
 			err = models.DeleteSession(user.ID)
 

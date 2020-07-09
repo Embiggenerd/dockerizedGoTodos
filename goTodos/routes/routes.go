@@ -36,10 +36,8 @@ func Init() {
 	http.HandleFunc("/submit", authRequired(submitHandler))
 	http.HandleFunc("/edit/", authRequired(editHandler))
 	http.HandleFunc("/delete/", deleteHandler)
-	http.HandleFunc("/register", registerUserHandler)
-	http.HandleFunc("/login", loginUserHandler)
+	http.HandleFunc("/register", validRegisterBody(registerUserHandler))
+	http.HandleFunc("/login", validLoginBody(loginUserHandler))
 	http.HandleFunc("/logout", logoutUserHandler)
-	http.HandleFunc("/oops", errorHandler)
-
 	http.ListenAndServe(":8000", nil)
 }
