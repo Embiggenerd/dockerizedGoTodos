@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 //	Create new row in sessions table with new user id, hex
 //
 func loginUserHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("LoginHandlerInvoked")
 	if r.Method == "GET" {
 		err := tmplts.ExecuteTemplate(w, "index.html", templData{State: "login", Header: "Log in with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil})
 

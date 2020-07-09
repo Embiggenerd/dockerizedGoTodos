@@ -9,12 +9,13 @@
 
   <div class="row">
     
-    {{ if ( eq .State "home") }} {{ template "home2" .}} {{ end }} 
+    {{ if ( eq .State "home") }} {{ template "home" .}} {{ end }} 
     {{ if ( eq .State "editTodo") }} {{ template "editTodo" .}} {{ end }} 
     {{ if ( eq .State "withoutAuth")}} {{ template "withoutAuth"}} {{ end }} 
     {{ if ( eq .State "signup")}} {{ template "signup"}} {{end}}
     {{ if ( eq .State "login")}} {{ template "login"}} {{end}}
     {{ if ( eq .State "submitTodo")}} {{ template "submitTodo"}} {{end}}
+    {{ if ( eq .State "error")}} {{ template "error"}} {{end}}
 
   </div>
 

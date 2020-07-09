@@ -23,91 +23,35 @@ func RandHex(n int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func FileHash(filePath string) (string, error) {
+func fileHash(filePath string) (string, error) {
 	var fileHash string
 	file, err := os.Open(filePath)
-	if err != nil {
-		return fileHash, err
-	}
 	defer file.Close()
+
 	hash := md5.New()
+
 	_, err = io.Copy(hash, file)
-	if err != nil {
-		return fileHash, err
-	}
+
 	hashInBytes := hash.Sum(nil)[:16]
+
 	fileHash = hex.EncodeToString(hashInBytes)
-	return fileHash, nil
+
+	return fileHash, err
 }
 
-// func AmendFilename(oldPath, hash string) error {
-// 	var b strings.Builder
-// 	b.WriteString(oldPath)
-// 	b.WriteString(".")
-// 	b.WriteString(hash)
-// 	err := os.Rename(oldPath, b.String())
-// 	return err
-// }
-
-// // func GetCSSPath(filePath)
-// func Visit(path string, f os.FileInfo, err error) error {
-// 	if name := f.Name(); strings.HasPrefix(name, "main") {
-// 		dir := filepath.Path(path)
-// 		newname := strings.Replace(name, "name_", "name1_", 1)
-// 		newpath := filepath.Join(dir, newname)
-// 		fmt.Printf("mv %q %q\n", path, newpath)
-// 		os.Rename(path, newpath)
-// 	}
-// 	return nil
-// 	return nil
-// }
-// func Visit(path string, file os.FileInfo, err error) error {
-
-// 	ok := strings.HasPrefix(file.Name(), "mainFloats.css")
-
-// 	if ok {
-// 		// var b strings.Builder
-// 		// b.writeString(path)
-// 		// b.WriteString("mainFloats.css")
-// 		// b.WriteString("lalalala")
-// 		//
-// 		fmt.Println("zz", path, file)
-// 		err := os.Rename(path, "assets/lalala")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 	}
-// 	return nil
-// }
 func copyFileToPublic(path string) error {
 	source, err := os.Open(path)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+
 	defer source.Close()
 	_, filename := filepath.Split(path)
 	newPath := "./public/" + filename
 
 	destination, err := os.Create(newPath)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
 	defer destination.Close()
 
-	_, err = io.Copy(destination, source) // first var shows number of bytes
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+	_, err = io.Copy(destination, source)
 
-	// err = destination.Sync()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-	return nil
+	return err
 }
 
 func removeStaleFiles(prefix string) error {
@@ -132,7 +76,7 @@ func removeStaleFiles(prefix string) error {
 }
 
 // BustaCache creates a css file with its hash included in the name
-func BustaCache(filename, oldFile string) (string, error) {
+func BustaCache(filename string) (string, error) {
 	var filenamePlusHash string
 	// Create 'public' filename if it doesn't exist
 	if _, err := os.Stat("public"); os.IsNotExist(err) {
@@ -144,26 +88,33 @@ func BustaCache(filename, oldFile string) (string, error) {
 		return filenamePlusHash, err
 	}
 
+	// Loop through the files in assets
 	err = filepath.Walk("./assets", func(path string, file os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+		// Look for the file with our filename
 		ok := strings.HasPrefix(file.Name(), filename)
 
 		if ok {
+			// copy file from assets to publix
 			err := copyFileToPublic(path)
 			if err != nil {
 				fmt.Println(err)
 				return err
 			}
+			// Get the path to the file
 			newPath := "./public/" + file.Name()
-			hash, err := FileHash(newPath)
+			// Generate a hash
+			hash, err := fileHash(newPath)
+
 			if err != nil {
 				fmt.Println(err)
 				return err
 			}
-			separated := strings.Split(file.Name(), ".")
 
+			separated := strings.Split(file.Name(), ".")
+			// Write the hash
 			var b strings.Builder
 			b.WriteString("./")
 			b.WriteString(filepath.Dir(newPath))
@@ -176,17 +127,14 @@ func BustaCache(filename, oldFile string) (string, error) {
 
 			_, filenamePlusHash = filepath.Split(b.String())
 
+			//
 			err = os.Rename(newPath, b.String())
 			if err != nil {
-				fmt.Println(err)
 				return err
 			}
-			return nil
 		}
-		return nil
+		return err
 	})
-	if err != nil {
-		return filenamePlusHash, err
-	}
-	return filenamePlusHash, nil
+
+	return filenamePlusHash, err
 }

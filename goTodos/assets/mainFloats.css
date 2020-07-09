@@ -62,13 +62,6 @@ section {
   text-decoration: none;
 }
 
-/* .no-auth-div {
-  background-color: #f1f1f1;
-  padding: 10px;
-  height: 100%;
-  border-radius: 10px;
-} */
-
 .side {
   width: 28.5%;
   text-align: center;
@@ -143,6 +136,7 @@ section {
     padding: 0;
     margin: 0;
   }
+  
   .middle {
     margin-top: 1.5%;
     margin-bottom: 1.5%;

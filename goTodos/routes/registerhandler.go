@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"goTodos/models"
-	"goTodos/utils"
 	"net/http"
 	"strconv"
 )
@@ -15,17 +14,18 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			utils.InternalServerError(w, r)
+			// utils.InternalServerError(w, r)
 		}
 
 	} else {
+
 		r.ParseForm()
 		age, err := strconv.Atoi(r.Form["age"][0])
 
-		if err != nil {
-			fmt.Println(err)
-			utils.InternalServerError(w, r)
-		}
+		// if err != nil {
+		// 	utils.InternalServerError(w, r)
+		// 	return
+		// }
 
 		user := models.User{
 			ID:        0,
@@ -38,10 +38,13 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = models.RegisterUser(&user)
 
 		if err != nil {
-			fmt.Println(err)
-			utils.InternalServerError(w, r)
+			fmt.Println("registerError", err)
+			// http.Redirect(w, r, "/oops", http.StatusInternalServerError)
+			http.Redirect(w, r, "/oops", http.StatusFound)
+
+			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }

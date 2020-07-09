@@ -2,9 +2,10 @@ package models
 
 import (
 	"errors"
-	"fmt"
+	"goTodos/utils"
 )
 
+// User is the shape of user Data
 type User struct {
 	ID        int
 	Age       int
@@ -14,18 +15,20 @@ type User struct {
 	Password  string
 }
 
+// RegisterUser returns
 func RegisterUser(u *User) (*User, error) {
-	id := 0
+	var id int
 	sqlUser := `
 		INSERT INTO users ( age, first_name, last_name, email, password)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id; `
 	err := db.QueryRow(sqlUser, u.Age, u.FirstName, u.LastName, u.Email, u.Password).Scan(&id)
 	if err != nil {
-		panic(err)
+		err = utils.HTTPError{Code: 400, Name: "Invalid Email", Msg: "User already registered"}
 	}
-	fmt.Println("new user id", id)
+
 	user := new(User)
+
 	sqlQuery := `
 		SELECT * FROM users WHERE id = $1;`
 
@@ -35,8 +38,9 @@ func RegisterUser(u *User) (*User, error) {
 		&user.LastName, &user.Email, &user.Password)
 
 	if err != nil {
-		return nil, err
+		err = utils.HTTPError{Code: 400, Name: "Invalid Email", Msg: "User already registers"}
 	}
+
 	return user, err
 }
 
@@ -57,9 +61,11 @@ func LoginUser(p, e string) (*User, error) {
 
 	err := db.QueryRow(sqlEmailQuery, e).Scan(&user.ID, &user.Age,
 		&user.FirstName, &user.LastName, &user.Email, &user.Password)
+
 	if err != nil {
-		panic(errors.New("Email not found in database"))
+		err = errors.New("Email not found in database")
 	}
+
 	isValid, err := validatePassword(user.Password, p)
 	if err != nil && isValid != true {
 		return nil, err
@@ -68,7 +74,6 @@ func LoginUser(p, e string) (*User, error) {
 }
 
 func GetUserFromSession(hex string) (*User, error) {
-	fmt.Println("hex:", hex)
 	var id int
 	sqlSessionQuery := `
 		 SELECT userid FROM sessions

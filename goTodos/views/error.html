@@ -1,0 +1,21 @@
+{{ define "error" }}
+
+<div class="column single">
+  <div class="container">
+    <section>
+      {{if .}}
+      
+      <div>
+        <h2>{{.Error.Code}}</h2>
+      </div>
+
+      <p>
+        {{.Error.Name}}: {{.Error.Msg}}
+      </p>
+
+      {{ end }}
+    </section>
+  </div>
+</div>
+
+{{ end }}
