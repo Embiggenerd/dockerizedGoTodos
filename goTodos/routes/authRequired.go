@@ -34,6 +34,7 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 		} else {
 			sessionHexFromCookie = cookie.Value
 
+			// Geg hex token from cookie to find a user in a session row
 			user, err := models.GetUserFromSession(sessionHexFromCookie)
 			if err != nil {
 				utils.UnauthorizedUserError(w)

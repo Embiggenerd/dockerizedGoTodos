@@ -1,20 +1,12 @@
 package routes
 
 import (
-	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
 )
 
-// Validate password, if true:
-//	Return user data
-// 	Find old session by user id, delete
-//	Create random hex string
-//	Create new row in sessions table with new user id, hex
-//
 func loginUserHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("LoginHandlerInvoked")
 	if r.Method == "GET" {
 		err := tmplts.ExecuteTemplate(w, "index.html", templData{State: "login", Header: "Log in with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil})
 
@@ -28,7 +20,6 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 		user, err := models.LoginUser(r.Form["password"][0], r.Form["email"][0])
 
 		if err != nil {
-			// http.Redirect(w, r, "/register", http.StatusFound)
 			w.WriteHeader(400)
 			tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "login",
@@ -44,6 +35,7 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 				},
 			})
 		} else {
+			// Delete old session
 			err = models.DeleteSession(user.ID)
 
 			if err != nil {
@@ -55,7 +47,7 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				utils.InternalServerError(w, r)
 			}
-
+			// Create new session
 			err = models.CreateSession(hex, user.ID)
 
 			if err != nil {

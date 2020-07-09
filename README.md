@@ -4,7 +4,12 @@ A simple authenticated todos app written using only sql, the go standard lib, an
 
 ## In Detail
 * Input some details to register. Email is unique. 
-* Login, hit the submit button. You can delete todos.
+* Login, hit the submit button. You can edit, delete todos
+* When uses are authenticated by a hex token, not user ID.
+* On login, a new random hex value is created, and kept in a session table along with user ID
+* To authenticate, middleware gets userid by looking up hex token in cookie
+* Hex token is refreshed every login for security, old sessions erased for space
+* This makes man in the middle attacks more difficult
 
 
 ## Visit App

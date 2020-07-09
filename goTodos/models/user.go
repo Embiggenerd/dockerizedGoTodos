@@ -74,6 +74,8 @@ func LoginUser(p, e string) (*User, error) {
 	return user, nil
 }
 
+// GetUserFromSession retrieves a user from a cookie by looking up a randomly generated
+// hex value on a cookie.
 func GetUserFromSession(hex string) (*User, error) {
 	var id int
 	sqlSessionQuery := `
