@@ -43,9 +43,7 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 					fmt.Println("user value in context", v)
 					return
 				}
-
 				utils.UnauthorizedUserError(w)
-
 			}
 			k := contextKey("user")
 			ctx := context.WithValue(context.Background(), k, user)
