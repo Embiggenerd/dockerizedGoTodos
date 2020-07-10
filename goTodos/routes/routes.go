@@ -4,6 +4,7 @@ import (
 	_ "expvar"
 	"goTodos/models"
 	"goTodos/utils"
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"strconv"
@@ -253,25 +254,21 @@ func logoutUserHandler(w http.ResponseWriter, r *http.Request) {
 
 // Init initializes routes in main
 func Init() {
+	mux := http.DefaultServeMux
 	fs := http.FileServer(http.Dir("static/"))
 
-	http.Handle("/static/", http.StripPrefix("/static", fs))
-	http.HandleFunc("/", authRequired(indexHandler))
-	http.HandleFunc("/submit", authRequired(submitHandler))
-	http.HandleFunc("/edit/", authRequired(editHandler))
-	http.HandleFunc("/delete/", deleteHandler)
-	http.HandleFunc("/register", validRegisterBody(registerUserHandler))
-	http.HandleFunc("/login", validLoginBody(loginUserHandler))
-	http.HandleFunc("/logout", logoutUserHandler)
-	// http.HandleFunc("/debug/pprof", pprof.Index)
-	// http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	// http.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	// http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	// http.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	// http.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	// http.Handle("/debug/pprof/heap", pprof.Handler("heap"))
-	// http.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-	// http.Handle("/debug/pprof/block", pprof.Handler("block"))
-	// http.Handle("/debug/vars", http.DefaultServeMux)
-	http.ListenAndServe(":8080", nil)
+	mux.Handle("/static/", http.StripPrefix("/static", fs))
+	mux.HandleFunc("/", authRequired(indexHandler))
+	mux.HandleFunc("/submit", authRequired(submitHandler))
+	mux.HandleFunc("/edit/", authRequired(editHandler))
+	mux.HandleFunc("/delete/", deleteHandler)
+	mux.HandleFunc("/register", validRegisterBody(registerUserHandler))
+	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
+	mux.HandleFunc("/logout", logoutUserHandler)
+	// http.ListenAndServe(":8080", nil)
+	httpServer := &http.Server{
+		Addr:    ":8080",
+		Handler: Metrics(mux), // wrap our server with metrics middleware
+	}
+	log.Fatal(httpServer.ListenAndServe())
 }
