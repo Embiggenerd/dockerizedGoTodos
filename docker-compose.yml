@@ -15,7 +15,9 @@ services:
   gotodos:
     build: ./goTodos
     ports:
-      - "8000:8000"
+      - "80:80"
+      - "8080:8080"
+
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/?sslmode=disable
     volumes:
