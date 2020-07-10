@@ -1,9 +1,11 @@
 package routes
 
 import (
+	_ "expvar"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
+	_ "net/http/pprof"
 	"strconv"
 	"text/template"
 )
@@ -252,6 +254,7 @@ func logoutUserHandler(w http.ResponseWriter, r *http.Request) {
 // Init initializes routes in main
 func Init() {
 	fs := http.FileServer(http.Dir("static/"))
+
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.HandleFunc("/", authRequired(indexHandler))
 	http.HandleFunc("/submit", authRequired(submitHandler))
@@ -260,5 +263,15 @@ func Init() {
 	http.HandleFunc("/register", validRegisterBody(registerUserHandler))
 	http.HandleFunc("/login", validLoginBody(loginUserHandler))
 	http.HandleFunc("/logout", logoutUserHandler)
-	http.ListenAndServe(":8000", nil)
+	// http.HandleFunc("/debug/pprof", pprof.Index)
+	// http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	// http.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	// http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	// http.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	// http.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	// http.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+	// http.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	// http.Handle("/debug/pprof/block", pprof.Handler("block"))
+	// http.Handle("/debug/vars", http.DefaultServeMux)
+	http.ListenAndServe(":8080", nil)
 }
