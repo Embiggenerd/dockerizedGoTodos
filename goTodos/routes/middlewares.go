@@ -21,7 +21,6 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 			err = tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "withoutAuth",
 				Header: "Welcome to Go Postgres Todos",
-				Styles: cacheBustedCss,
 				TodoId: "",
 				Todos:  nil,
 				User:   nil,
@@ -70,7 +69,6 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "signup",
 					Header: "Register with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,
@@ -89,7 +87,6 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "signup",
 					Header: "Register with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,
@@ -107,7 +104,6 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "signup",
 					Header: "Register with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,
@@ -129,7 +125,6 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 					tmplts.ExecuteTemplate(w, "index.html", templData{
 						State:  "signup",
 						Header: "Register with an email and password",
-						Styles: cacheBustedCss,
 						TodoId: "",
 						Todos:  nil,
 						User:   nil,
@@ -158,7 +153,6 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "login",
 					Header: "Log in with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,
@@ -177,7 +171,6 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "login",
 					Header: "Log in with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,
@@ -195,7 +188,6 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 				tmplts.ExecuteTemplate(w, "index.html", templData{
 					State:  "login",
 					Header: "Log in with an email and password",
-					Styles: cacheBustedCss,
 					TodoId: "",
 					Todos:  nil,
 					User:   nil,

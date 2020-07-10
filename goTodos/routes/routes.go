@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
@@ -15,7 +14,6 @@ var tmplts = template.Must(template.ParseFiles("views/index.html", "views/withou
 type templData struct {
 	State  string
 	Header string
-	Styles string
 	TodoId string
 	Todos  []*models.Todo
 	User   *models.User
@@ -23,8 +21,6 @@ type templData struct {
 }
 
 type contextKey string
-
-var cacheBustedCss string
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user off context
@@ -44,7 +40,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		templData{
 			State:  "home",
 			Header: "Home",
-			Styles: cacheBustedCss,
 			TodoId: "",
 			Todos:  todos,
 			User:   user,
@@ -59,7 +54,6 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 		err := tmplts.ExecuteTemplate(w, "index.html", templData{
 			State:  "submitTodo",
 			Header: "Submit a new todo",
-			Styles: cacheBustedCss,
 			TodoId: "",
 			Todos:  nil,
 			User:   nil,
@@ -102,7 +96,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 			templData{
 				State:  "editTodo",
 				Header: "Edit your todo",
-				Styles: cacheBustedCss,
 				TodoId: todoId,
 				Todos:  nil,
 				User:   nil,
@@ -141,7 +134,12 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 
 		tmplts.ExecuteTemplate(w, "index.html", templData{
-			State: "signup", Header: "Register with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil, Error: nil,
+			State:  "signup",
+			Header: "Register with an email and password",
+			TodoId: "",
+			Todos:  nil,
+			User:   nil,
+			Error:  nil,
 		})
 
 	} else if r.Method == "POST" {
@@ -163,7 +161,6 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 			tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "signup",
 				Header: "Register with an email and password, all values are required",
-				Styles: cacheBustedCss,
 				TodoId: "",
 				Todos:  nil,
 				User:   nil,
@@ -178,7 +175,12 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		err := tmplts.ExecuteTemplate(w, "index.html", templData{State: "login", Header: "Log in with an email and password", Styles: cacheBustedCss, TodoId: "", Todos: nil, User: nil})
+		err := tmplts.ExecuteTemplate(w, "index.html", templData{
+			State:  "login",
+			Header: "Log in with an email and password",
+			TodoId: "",
+			Todos:  nil,
+			User:   nil})
 
 		if err != nil {
 			utils.InternalServerError(w, r)
@@ -194,7 +196,6 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 			tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "login",
 				Header: "Log in with an email and password",
-				Styles: cacheBustedCss,
 				TodoId: "",
 				Todos:  nil,
 				User:   nil,
@@ -250,10 +251,7 @@ func logoutUserHandler(w http.ResponseWriter, r *http.Request) {
 
 // Init initializes routes in main
 func Init() {
-	cacheBustedCss, _ = utils.BustaCache("mainFloats.css")
-
-	fmt.Println(cacheBustedCss)
-	fs := http.FileServer(http.Dir("public/"))
+	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.HandleFunc("/", authRequired(indexHandler))
 	http.HandleFunc("/submit", authRequired(submitHandler))
