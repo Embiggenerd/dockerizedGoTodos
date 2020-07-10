@@ -3,7 +3,7 @@
 A simple authenticated todos app written using only sql, the go standard lib, and docker.
 
 ## In Detail
-* Input some details to register. Email is unique. 
+* Input some details to register. Only email and password are necessary. Check out error messages. 
 * Login, hit the submit button. You can edit, delete todos
 * When uses are authenticated by a hex token, not user ID.
 * On login, a new random hex value is created, and kept in a session table along with user ID
@@ -15,8 +15,6 @@ A simple authenticated todos app written using only sql, the go standard lib, an
 ## Visit App
 
 Clone the repo, type docker-compose up. Uses port 8088.
-
-Some folders will be created under root user.
 
 ## Demonstrates
 * Ability to read documentation and source code.
