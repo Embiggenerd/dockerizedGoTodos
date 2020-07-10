@@ -265,10 +265,10 @@ func Init() {
 	mux.HandleFunc("/register", validRegisterBody(registerUserHandler))
 	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
 	mux.HandleFunc("/logout", logoutUserHandler)
-	// http.ListenAndServe(":8080", nil)
 	httpServer := &http.Server{
 		Addr:    ":8080",
-		Handler: Metrics(mux), // wrap our server with metrics middleware
+		Handler: Metrics(mux),
 	}
 	log.Fatal(httpServer.ListenAndServe())
+
 }

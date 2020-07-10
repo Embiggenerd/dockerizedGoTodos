@@ -4,7 +4,8 @@ A simple authenticated todos app written using only sql, the go standard lib, an
 
 ## Visit App
 
-Clone the repo, type docker-compose up. Uses port 8080.
+Clone the repo, type docker-compose up. Uses port 8080. Metrics can be viewed at /debug/vars, with 'requests' being a 
+request counter. Visit the app and check that the number has changed.
 
 ## In Detail
 
@@ -16,7 +17,10 @@ Clone the repo, type docker-compose up. Uses port 8080.
 * To authenticate, middleware gets userid by looking up hex token in cookie in sessions table.
 * Hex token is refreshed every login for security, old sessions erased for space
 * This makes man in the middle attacks more difficult
+* Simple metrics middleware is implemented to count number of requests
 
 ## Demonstrates
 
 * Ability to read documentation and source code.
+* User registration/login
+* Metrics and observability
