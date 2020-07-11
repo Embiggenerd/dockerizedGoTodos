@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"goTodos/models"
 	"goTodos/utils"
 	"net/http"
@@ -17,7 +16,7 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 		cookie, err := r.Cookie("user-session")
 
 		if err != nil {
-			fmt.Println(err)
+
 			err = tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "withoutAuth",
 				Header: "Welcome to Go Postgres Todos",
@@ -42,10 +41,8 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 			f := func(ctx context.Context, k contextKey) {
 				v := ctx.Value(k)
 				if v != nil {
-					fmt.Println("user value in context", v)
 					return
 				}
-				utils.UnauthorizedUserError(w)
 			}
 			k := contextKey("user")
 			ctx := context.WithValue(context.Background(), k, user)
@@ -62,57 +59,41 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 
 			r.ParseForm()
 
-			fmt.Println("len(age)", len(r.Form["age"]))
-
 			if r.Form["email"][0] == "" {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "signup",
-					Header: "Register with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Please include an email",
-					},
-				})
+
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Invalid Input: Please include an email",
+					"signup",
+				)
+
 				return
 			}
 
 			regex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
 			if !regex.MatchString(r.Form["email"][0]) {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "signup",
-					Header: "Register with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Email must be in the form 'name@example.com'",
-					},
-				})
+
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Email must be in the form 'name@example.com'",
+					"signup",
+				)
+
 				return
 			}
 
 			if r.Form["password"][0] == "" {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "signup",
-					Header: "Register with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Please include an password",
-					},
-				})
+
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Please include a password",
+					"signup",
+				)
+
 				return
 			}
 
@@ -120,20 +101,14 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 				_, err := strconv.Atoi(r.Form["age"][0])
 
 				if err != nil {
-					fmt.Println(err)
-					w.WriteHeader(400)
-					tmplts.ExecuteTemplate(w, "index.html", templData{
-						State:  "signup",
-						Header: "Register with an email and password",
-						TodoId: "",
-						Todos:  nil,
-						User:   nil,
-						Error: &utils.HTTPError{
-							Code: 400,
-							Name: "Invalid Input",
-							Msg:  "Age must be an integer",
-						},
-					})
+
+					errorResp.RespondWithError(
+						w,
+						http.StatusUnprocessableEntity,
+						"Age must be an integer",
+						"signup",
+					)
+
 					return
 				}
 			}
@@ -149,54 +124,38 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 			r.ParseForm()
 
 			if r.Form["email"][0] == "" {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "login",
-					Header: "Log in with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Please include an email",
-					},
-				})
+
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Please include an email",
+					"login",
+				)
+
 				return
 			}
 
 			regex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
 			if !regex.MatchString(r.Form["email"][0]) {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "login",
-					Header: "Log in with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Email must be in the form 'name@example.com'",
-					},
-				})
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Email must be in the form 'name@example.com'",
+					"login",
+				)
 				return
 			}
 
 			if r.Form["password"][0] == "" {
-				w.WriteHeader(400)
-				tmplts.ExecuteTemplate(w, "index.html", templData{
-					State:  "login",
-					Header: "Log in with an email and password",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: 400,
-						Name: "Invalid Input",
-						Msg:  "Please include an password",
-					},
-				})
+
+				errorResp.RespondWithError(
+					w,
+					http.StatusUnprocessableEntity,
+					"Please include an password",
+					"login",
+				)
+
 				return
 			}
 		}

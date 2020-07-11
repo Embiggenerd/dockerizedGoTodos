@@ -1,4 +1,0 @@
-* Write proper waitfor script for goTodos
-// Cache buster in goTodos does not work
-// Clean up, organize main file
-Implement server sent events

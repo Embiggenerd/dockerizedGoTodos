@@ -11,6 +11,8 @@ import (
 	"text/template"
 )
 
+var errorResp Error
+
 var tmplts = template.Must(template.ParseFiles("views/index.html", "views/withoutAuth.html", "views/home.html", "views/nav.html",
 	"views/head.html", "views/header.html", "views/error.html", "views/footer.html", "views/login.html", "views/editTodo.html", "views/signup.html", "views/submitTodo.html"))
 
@@ -25,36 +27,52 @@ type templData struct {
 
 type contextKey string
 
+// If user gets to this, he will be served index with 'home' state,
+// which shows him his todos
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user off context
-	user, ok := r.Context().Value(contextKey("user")).(*models.User)
-	// Any error is 500 status
-	if !ok {
-		utils.InternalServerError(w, r)
-	}
+	user, _ := r.Context().Value(contextKey("user")).(*models.User)
+
 	// Get todos from todos model
 	todos, err := models.GetTodos(user.ID)
+
 	// Also 500 error
 	if err != nil {
-		utils.InternalServerError(w, r)
+		w.WriteHeader(http.StatusInternalServerError)
+		tmplts.ExecuteTemplate(w, "index.html",
+			templData{
+				State:  "home",
+				Header: "Home",
+				TodoId: "",
+				Todos:  nil,
+				User:   nil,
+				Error: &utils.HTTPError{
+					Code: http.StatusInternalServerError,
+					Name: "",
+					Msg:  err.Error(),
+				},
+			})
+		return
 	}
+
 	// Render template
-	err = tmplts.ExecuteTemplate(w, "index.html",
+	w.WriteHeader(http.StatusOK)
+	tmplts.ExecuteTemplate(w, "index.html",
 		templData{
 			State:  "home",
 			Header: "Home",
 			TodoId: "",
 			Todos:  todos,
 			User:   user,
+			Error:  nil,
 		})
-	if err != nil {
-		utils.InternalServerError(w, r)
-	}
 }
 
 func submitHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		err := tmplts.ExecuteTemplate(w, "index.html", templData{
+
+		w.WriteHeader(http.StatusOK)
+		tmplts.ExecuteTemplate(w, "index.html", templData{
 			State:  "submitTodo",
 			Header: "Submit a new todo",
 			TodoId: "",
@@ -62,18 +80,12 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 			User:   nil,
 		})
 
-		if err != nil {
-			utils.InternalServerError(w, r)
-		}
+	} else if r.Method == "POST" {
 
-	} else {
-		user, ok := r.Context().Value(contextKey("user")).(*models.User)
-
-		if !ok {
-			utils.InternalServerError(w, r)
-		}
+		user, _ := r.Context().Value(contextKey("user")).(*models.User)
 
 		r.ParseForm()
+
 		todo := models.Todo{
 			ID:       0,
 			Body:     r.Form["body"][0],
@@ -84,7 +96,21 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 		_, err := models.SubmitTodo(&todo)
 
 		if err != nil {
-			utils.InternalServerError(w, r)
+
+			w.WriteHeader(http.StatusInternalServerError)
+			tmplts.ExecuteTemplate(w, "index.html", templData{
+				State:  "submitTodo",
+				Header: "Submit a new todo",
+				TodoId: "",
+				Todos:  nil,
+				User:   nil,
+				Error: &utils.HTTPError{
+					Code: http.StatusInternalServerError,
+					Name: "",
+					Msg:  err.Error(),
+				},
+			})
+			return
 		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
@@ -95,7 +121,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	todoId := r.URL.Path[len("/edit/"):]
 
 	if r.Method == "GET" {
-		err := tmplts.ExecuteTemplate(w, "index.html",
+		tmplts.ExecuteTemplate(w, "index.html",
 			templData{
 				State:  "editTodo",
 				Header: "Edit your todo",
@@ -104,10 +130,6 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 				User:   nil,
 			})
 
-		if err != nil {
-			utils.InternalServerError(w, r)
-		}
-
 	} else {
 		r.ParseForm()
 		body := r.Form["body"][0]
@@ -115,7 +137,21 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		_, err := models.EditTodo(todoId, body)
 
 		if err != nil {
-			utils.InternalServerError(w, r)
+
+			w.WriteHeader(http.StatusInternalServerError)
+			tmplts.ExecuteTemplate(w, "index.html",
+				templData{
+					State:  "editTodo",
+					Header: "Edit your todo",
+					TodoId: todoId,
+					Todos:  nil,
+					User:   nil,
+					Error: &utils.HTTPError{
+						Code: http.StatusInternalServerError,
+						Name: "",
+						Msg:  err.Error(),
+					},
+				})
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -126,7 +162,21 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/delete/"):]
 		err := models.DeleteTodo(id)
 		if err != nil {
-			utils.InternalServerError(w, r)
+			w.WriteHeader(http.StatusInternalServerError)
+			tmplts.ExecuteTemplate(w, "index.html",
+				templData{
+					State:  "home",
+					Header: "Home",
+					TodoId: "",
+					Todos:  nil,
+					User:   nil,
+					Error: &utils.HTTPError{
+						Code: http.StatusInternalServerError,
+						Name: "",
+						Msg:  err.Error(),
+					},
+				})
+			return
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -178,16 +228,12 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		err := tmplts.ExecuteTemplate(w, "index.html", templData{
+		tmplts.ExecuteTemplate(w, "index.html", templData{
 			State:  "login",
 			Header: "Log in with an email and password",
 			TodoId: "",
 			Todos:  nil,
 			User:   nil})
-
-		if err != nil {
-			utils.InternalServerError(w, r)
-		}
 
 	} else if r.Method == "POST" {
 		r.ParseForm()
@@ -265,6 +311,7 @@ func Init() {
 	mux.HandleFunc("/register", validRegisterBody(registerUserHandler))
 	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
 	mux.HandleFunc("/logout", logoutUserHandler)
+
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: Metrics(mux),

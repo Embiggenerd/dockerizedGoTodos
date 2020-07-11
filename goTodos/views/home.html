@@ -1,19 +1,18 @@
 {{ define "home"}}
 
 <div class="column side">
-  <h1>something</h1>
+  {{ template "error" .}}
 </div>
 
 <div class="column middle">
   {{if .}}
   <div>
-    <h2>{{.User.FirstName}} {{.User.LastName}} wrote:</h2>
+    <h2>{{.User.FirstName}} {{.User.LastName}} Todo:</h2>
   </div>
   {{ range .Todos}}
   <div class="card">
-    <div>
-    </div>
     <div class="todo-div">
+      
       <div class="todo-text-div">
         <a href="/edit/{{.ID}}">{{ .Body }}</a>
       </div>
@@ -21,6 +20,7 @@
       <form action="/delete/{{.ID}}" method="POST">
         <button type="submit" class="delete-button">Delete</button>
       </form>
+
     </div>
   </div>
 
@@ -29,7 +29,7 @@
 </div>
 
 <div class="column side">
-  <h1>Something</h1>
+  <h1>Advertisements</h1>
 </div>
 
 {{ end }}
