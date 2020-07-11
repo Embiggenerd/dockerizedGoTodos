@@ -2,6 +2,7 @@ package routes
 
 import (
 	_ "expvar"
+	"goTodos/logger"
 	"goTodos/models"
 	"goTodos/utils"
 	"log"
@@ -9,6 +10,8 @@ import (
 	_ "net/http/pprof"
 	"strconv"
 	"text/template"
+
+	"github.com/improbable-eng/go-httpwares/logging/logrus/ctxlogrus"
 )
 
 var errorResp Error
@@ -30,6 +33,8 @@ type contextKey string
 // If user gets to this, he will be served index with 'home' state,
 // which shows him his todos
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	ctxlogrus.Extract(r.Context()).Info("logging")
+
 	// Get user off context
 	user, _ := r.Context().Value(contextKey("user")).(*models.User)
 
@@ -314,8 +319,8 @@ func Init() {
 
 	httpServer := &http.Server{
 		Addr:    ":8080",
-		Handler: Metrics(mux),
+		Handler: logger.LoggingMiddleware(Metrics(mux)),
 	}
-	log.Fatal(httpServer.ListenAndServe())
 
+	log.Fatal(httpServer.ListenAndServe())
 }
