@@ -14,8 +14,6 @@ import (
 	"github.com/improbable-eng/go-httpwares/logging/logrus/ctxlogrus"
 )
 
-var errorResp Error
-
 var tmplts = template.Must(template.ParseFiles("views/index.html", "views/withoutAuth.html", "views/home.html", "views/nav.html",
 	"views/head.html", "views/header.html", "views/error.html", "views/footer.html", "views/login.html", "views/editTodo.html", "views/signup.html", "views/submitTodo.html"))
 
@@ -43,20 +41,15 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Also 500 error
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		tmplts.ExecuteTemplate(w, "index.html",
-			templData{
-				State:  "home",
-				Header: "Home",
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error: &utils.HTTPError{
-					Code: http.StatusInternalServerError,
-					Name: "",
-					Msg:  err.Error(),
-				},
-			})
+		respondWithError(
+			w,
+			"home",
+			&utils.HTTPError{
+				Code: http.StatusInternalServerError,
+				Msg:  "An error happend that isn't your fault",
+			},
+		)
+
 		return
 	}
 
@@ -86,7 +79,6 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 		})
 
 	} else if r.Method == "POST" {
-
 		user, _ := r.Context().Value(contextKey("user")).(*models.User)
 
 		r.ParseForm()
@@ -101,20 +93,7 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 		_, err := models.SubmitTodo(&todo)
 
 		if err != nil {
-
-			w.WriteHeader(http.StatusInternalServerError)
-			tmplts.ExecuteTemplate(w, "index.html", templData{
-				State:  "submitTodo",
-				Header: "Submit a new todo",
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error: &utils.HTTPError{
-					Code: http.StatusInternalServerError,
-					Name: "",
-					Msg:  err.Error(),
-				},
-			})
+			respondWithError(w, "submitTodo", err)
 			return
 		}
 
@@ -142,21 +121,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		_, err := models.EditTodo(todoId, body)
 
 		if err != nil {
-
-			w.WriteHeader(http.StatusInternalServerError)
-			tmplts.ExecuteTemplate(w, "index.html",
-				templData{
-					State:  "editTodo",
-					Header: "Edit your todo",
-					TodoId: todoId,
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: http.StatusInternalServerError,
-						Name: "",
-						Msg:  err.Error(),
-					},
-				})
+			respondWithError(w, "editTodo", err)
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -165,24 +130,14 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		id := r.URL.Path[len("/delete/"):]
+
 		err := models.DeleteTodo(id)
+
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			tmplts.ExecuteTemplate(w, "index.html",
-				templData{
-					State:  "home",
-					Header: "Home",
-					TodoId: "",
-					Todos:  nil,
-					User:   nil,
-					Error: &utils.HTTPError{
-						Code: http.StatusInternalServerError,
-						Name: "",
-						Msg:  err.Error(),
-					},
-				})
+			respondWithError(w, "home", err)
 			return
 		}
+
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
@@ -190,6 +145,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
 
 		tmplts.ExecuteTemplate(w, "index.html", templData{
 			State:  "signup",
@@ -210,20 +166,13 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 			FirstName: r.Form["firstName"][0],
 			LastName:  r.Form["lastName"][0],
 			Email:     r.Form["email"][0],
-			Password:  r.Form["password"][0]}
+			Password:  r.Form["password"][0],
+		}
 
-		_, httpErr := models.RegisterUser(&user)
+		_, err := models.RegisterUser(&user)
 
-		if httpErr != nil {
-			w.WriteHeader(httpErr.Code)
-			tmplts.ExecuteTemplate(w, "index.html", templData{
-				State:  "signup",
-				Header: "Register with an email and password, all values are required",
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error:  &utils.HTTPError{Code: httpErr.Code, Name: httpErr.Name, Msg: httpErr.Msg},
-			})
+		if err != nil {
+			respondWithError(w, "signup", err)
 			return
 		}
 
@@ -233,6 +182,8 @@ func registerUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		w.WriteHeader(http.StatusOK)
+
 		tmplts.ExecuteTemplate(w, "index.html", templData{
 			State:  "login",
 			Header: "Log in with an email and password",
@@ -243,51 +194,33 @@ func loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
+		// Login the user
 		user, err := models.LoginUser(r.Form["password"][0], r.Form["email"][0])
 
+		// Delete old session
+		err = models.DeleteSession(user.ID)
+
+		// Make a new random hex value
+		hex, err := utils.RandHex(10)
+
+		// Create new session
+		err = models.CreateSession(hex, user.ID)
+
 		if err != nil {
-			w.WriteHeader(400)
-			tmplts.ExecuteTemplate(w, "index.html", templData{
-				State:  "login",
-				Header: "Log in with an email and password",
-				TodoId: "",
-				Todos:  nil,
-				User:   nil,
-				Error: &utils.HTTPError{
-					Code: 400,
-					Name: "Invalid Input",
-					Msg:  "Try again",
-				},
-			})
-		} else {
-			// Delete old session
-			err = models.DeleteSession(user.ID)
+			respondWithError(w, "login", err)
 
-			if err != nil {
-				utils.InternalServerError(w, r)
-			}
-
-			hex, err := utils.RandHex(10)
-
-			if err != nil {
-				utils.InternalServerError(w, r)
-			}
-			// Create new session
-			err = models.CreateSession(hex, user.ID)
-
-			if err != nil {
-				utils.InternalServerError(w, r)
-			}
-
-			cookie := &http.Cookie{
-				Name:     "user-session",
-				Value:    hex,
-				MaxAge:   60 * 60 * 24,
-				HttpOnly: true,
-			}
-			http.SetCookie(w, cookie)
-			http.Redirect(w, r, "/", http.StatusFound)
+			return
 		}
+
+		cookie := &http.Cookie{
+			Name:     "user-session",
+			Value:    hex,
+			MaxAge:   60 * 60 * 24,
+			HttpOnly: true,
+		}
+
+		http.SetCookie(w, cookie)
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
@@ -316,6 +249,9 @@ func Init() {
 	mux.HandleFunc("/register", validRegisterBody(registerUserHandler))
 	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
 	mux.HandleFunc("/logout", logoutUserHandler)
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "favicon.ico")
+	})
 
 	httpServer := &http.Server{
 		Addr:    ":8080",

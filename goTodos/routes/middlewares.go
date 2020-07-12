@@ -16,8 +16,9 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 		cookie, err := r.Cookie("user-session")
 
 		if err != nil {
+			w.WriteHeader(http.StatusOK)
 
-			err = tmplts.ExecuteTemplate(w, "index.html", templData{
+			tmplts.ExecuteTemplate(w, "index.html", templData{
 				State:  "withoutAuth",
 				Header: "Welcome to Go Postgres Todos",
 				TodoId: "",
@@ -25,17 +26,15 @@ func authRequired(handler http.HandlerFunc) http.HandlerFunc {
 				User:   nil,
 			})
 
-			if err != nil {
-				utils.InternalServerError(w, r)
-			}
-
 		} else {
 			sessionHexFromCookie = cookie.Value
 
 			// Geg hex token from cookie to find a user in a session row
 			user, err := models.GetUserFromSession(sessionHexFromCookie)
+
 			if err != nil {
-				utils.UnauthorizedUserError(w)
+				respondWithError(w, "withoutAuth", err)
+				return
 			}
 
 			f := func(ctx context.Context, k contextKey) {
@@ -61,11 +60,13 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 
 			if r.Form["email"][0] == "" {
 
-				errorResp.RespondWithError(
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Invalid Input: Please include an email",
 					"signup",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Invalid Input: Please include an email",
+					},
 				)
 
 				return
@@ -75,11 +76,13 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 
 			if !regex.MatchString(r.Form["email"][0]) {
 
-				errorResp.RespondWithError(
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Email must be in the form 'name@example.com'",
 					"signup",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Email must be in the form 'name@example.com'",
+					},
 				)
 
 				return
@@ -87,11 +90,13 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 
 			if r.Form["password"][0] == "" {
 
-				errorResp.RespondWithError(
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Please include a password",
 					"signup",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Please include a password",
+					},
 				)
 
 				return
@@ -102,13 +107,14 @@ func validRegisterBody(handler http.HandlerFunc) http.HandlerFunc {
 
 				if err != nil {
 
-					errorResp.RespondWithError(
+					respondWithError(
 						w,
-						http.StatusUnprocessableEntity,
-						"Age must be an integer",
 						"signup",
+						&utils.HTTPError{
+							Code: http.StatusUnprocessableEntity,
+							Msg:  "Age must be an integer",
+						},
 					)
-
 					return
 				}
 			}
@@ -125,11 +131,13 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 
 			if r.Form["email"][0] == "" {
 
-				errorResp.RespondWithError(
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Please include an email",
 					"login",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Please include an email",
+					},
 				)
 
 				return
@@ -138,22 +146,28 @@ func validLoginBody(handler http.HandlerFunc) http.HandlerFunc {
 			regex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 			if !regex.MatchString(r.Form["email"][0]) {
-				errorResp.RespondWithError(
+
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Email must be in the form 'name@example.com'",
 					"login",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Email must be in the form 'name@example.com'",
+					},
 				)
+
 				return
 			}
 
 			if r.Form["password"][0] == "" {
 
-				errorResp.RespondWithError(
+				respondWithError(
 					w,
-					http.StatusUnprocessableEntity,
-					"Please include an password",
 					"login",
+					&utils.HTTPError{
+						Code: http.StatusUnprocessableEntity,
+						Msg:  "Please include a password",
+					},
 				)
 
 				return
