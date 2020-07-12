@@ -91,7 +91,8 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 			json.Unmarshal(logs, &logsArr)
 
-			logsArr = append(logsArr, request)
+			// logsArr = append(logsArr, request)
+			logsArr = append([]interface{}{request}, logsArr...)
 
 			logsArrJSON, _ := json.MarshalIndent(&logsArr, "", " ")
 
