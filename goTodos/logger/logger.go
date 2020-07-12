@@ -64,13 +64,16 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		start := time.Now()
 		wrapped := wrapResponseWriter(w)
+
 		next.ServeHTTP(wrapped, r)
+
 		fmt.Println(
 			"status", wrapped.status,
 			"method", r.Method,
 			"path", r.URL.EscapedPath(),
 			"duration", time.Since(start),
 		)
+
 		request := requestLog{
 			Status:   wrapped.status,
 			Method:   r.Method,
@@ -109,6 +112,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
+
 	if os.IsNotExist(err) {
 		return false
 	}

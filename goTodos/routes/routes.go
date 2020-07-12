@@ -250,6 +250,7 @@ func Init() {
 	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
 	mux.HandleFunc("/logout", logoutUserHandler)
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 		http.ServeFile(w, r, "favicon.ico")
 	})
 
