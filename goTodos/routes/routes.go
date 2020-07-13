@@ -142,7 +142,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func registerUserHandler(w http.ResponseWriter, r *http.Request) {
+func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		w.WriteHeader(http.StatusOK)
@@ -246,7 +246,7 @@ func Init() {
 	mux.HandleFunc("/submit", authRequired(submitHandler))
 	mux.HandleFunc("/edit/", authRequired(editHandler))
 	mux.HandleFunc("/delete/", deleteHandler)
-	mux.HandleFunc("/register", validRegisterBody(registerUserHandler))
+	mux.HandleFunc("/register", validRegisterBody(RegisterUserHandler))
 	mux.HandleFunc("/login", validLoginBody(loginUserHandler))
 	mux.HandleFunc("/logout", logoutUserHandler)
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
